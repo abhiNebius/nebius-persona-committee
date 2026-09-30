@@ -1,0 +1,7 @@
+outputs/
+config/paths.json
+.env
+*.local.*
+__pycache__/
+.venv/
+.DS_Store

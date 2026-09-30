@@ -1,0 +1,207 @@
+{
+  "groups": {
+    "users": [
+      "P01",
+      "P02",
+      "P03",
+      "P04",
+      "P05",
+      "P06"
+    ],
+    "buyers": [
+      "P07",
+      "P08",
+      "P09",
+      "P10",
+      "P11"
+    ]
+  },
+  "motions": {
+    "token_factory_sprint": [
+      "P01",
+      "P05",
+      "P06",
+      "P03"
+    ],
+    "capacity_deal": [
+      "P02",
+      "P04",
+      "P07",
+      "P11"
+    ],
+    "enterprise_relay": [
+      "P03",
+      "P07",
+      "P08",
+      "P09",
+      "P10"
+    ],
+    "brand": [
+      "P01",
+      "P02",
+      "P03",
+      "P04",
+      "P05",
+      "P06",
+      "P07",
+      "P08",
+      "P09",
+      "P10",
+      "P11"
+    ]
+  },
+  "asset_type_adds": {
+    "11": [
+      "P07",
+      "P09"
+    ],
+    "12": [
+      "P03",
+      "P09"
+    ],
+    "18": [
+      "P02",
+      "P04"
+    ]
+  },
+  "reading_sources": {
+    "P01": [
+      "openrouter.ai",
+      "artificialanalysis.ai",
+      "semianalysis.com",
+      "news.ycombinator.com",
+      "latent.space",
+      "github.com",
+      "huggingface.co"
+    ],
+    "P02": [
+      "semianalysis.com",
+      "news.ycombinator.com",
+      "github.com",
+      "developer.nvidia.com",
+      "ai.meta.com",
+      "latent.space"
+    ],
+    "P03": [
+      "netflixtechblog.com",
+      "uber.com",
+      "semianalysis.com",
+      "latent.space",
+      "mlops.community",
+      "news.ycombinator.com",
+      "openrouter.ai"
+    ],
+    "P04": [
+      "semianalysis.com",
+      "github.com",
+      "forums.developer.nvidia.com",
+      "reddit.com",
+      "cncf.io",
+      "modal.com",
+      "coreweave.com"
+    ],
+    "P05": [
+      "artificialanalysis.ai",
+      "openrouter.ai",
+      "github.com",
+      "latent.space",
+      "semianalysis.com",
+      "fireworks.ai",
+      "baseten.co"
+    ],
+    "P06": [
+      "simonwillison.net",
+      "latent.space",
+      "reddit.com",
+      "news.ycombinator.com",
+      "openrouter.ai",
+      "huggingface.co",
+      "hamel.dev"
+    ],
+    "P07": [
+      "cfodive.com",
+      "wsj.com",
+      "mostlymetrics.com",
+      "thesaascfo.com",
+      "deloitte.com",
+      "a16z.com",
+      "pymnts.com"
+    ],
+    "P08": [
+      "securityweek.com",
+      "darkreading.com",
+      "csoonline.com",
+      "cisoseries.com",
+      "risky.biz",
+      "gartner.com",
+      "semianalysis.com"
+    ],
+    "P09": [
+      "gartner.com",
+      "forrester.com",
+      "vendr.com",
+      "spendmatters.com",
+      "dlapiper.com",
+      "morganlewis.com",
+      "tropicapp.io"
+    ],
+    "P10": [
+      "gartner.com",
+      "mckinsey.com",
+      "bcg.com",
+      "deloitte.com",
+      "wsj.com",
+      "ciodive.com",
+      "cio.com"
+    ],
+    "P11": [
+      "semianalysis.com",
+      "epoch.ai",
+      "dwarkesh.com",
+      "latent.space",
+      "datacenterdynamics.com",
+      "theinformation.com"
+    ]
+  },
+  "source_tiers": {
+    "tier1": [
+      "sec.gov",
+      "semianalysis.com",
+      "gartner.com",
+      "forrester.com",
+      "artificialanalysis.ai",
+      "epoch.ai",
+      "nvidia.com",
+      "mckinsey.com",
+      "bcg.com",
+      "deloitte.com",
+      "idc.com"
+    ],
+    "tier3": [
+      "news.ycombinator.com",
+      "reddit.com",
+      "x.com",
+      "twitter.com",
+      "bsky.app"
+    ]
+  },
+  "lens": {
+    "P01": "inference cost per token startups",
+    "P02": "GPU cluster training reliability",
+    "P03": "AI platform team build vs buy",
+    "P04": "GPU cluster failures reliability",
+    "P05": "LLM inference benchmark latency",
+    "P06": "AI agents developers open models",
+    "P07": "AI compute spending costs CFO",
+    "P08": "AI cloud security breach",
+    "P09": "cloud contract pricing procurement",
+    "P10": "enterprise AI strategy",
+    "P11": "GPU capacity data center power"
+  },
+  "line_terms": {
+    "token_factory": "AI inference",
+    "ai_cloud": "GPU cloud",
+    "enterprise": "enterprise AI infrastructure",
+    "brand": "AI cloud"
+  }
+}

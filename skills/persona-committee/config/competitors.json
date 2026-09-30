@@ -1,0 +1,43 @@
+{
+  "sets": {
+    "token_factory": ["fal", "Together AI", "Baseten", "Replicate", "Fireworks AI", "AWS", "Google Cloud"],
+    "ai_cloud": ["CoreWeave", "Lambda", "Crusoe", "Nscale"],
+    "enterprise": ["AWS", "Microsoft Azure", "Google Cloud", "OCI", "CoreWeave"],
+    "brand": ["CoreWeave", "Lambda", "Together AI", "Crusoe", "AWS"]
+  },
+  "companies": {
+    "CoreWeave": {"aliases": ["CoreWeave"], "domain": "coreweave.com", "homepage": "https://www.coreweave.com/", "pricing": "https://www.coreweave.com/pricing"},
+    "Lambda": {"aliases": ["Lambda", "Lambda Labs"], "domain": "lambda.ai", "homepage": "https://lambda.ai/", "pricing": "https://lambda.ai/pricing"},
+    "Crusoe": {"aliases": ["Crusoe"], "domain": "crusoe.ai", "homepage": "https://www.crusoe.ai/"},
+    "Nscale": {"aliases": ["Nscale"], "domain": "nscale.com", "homepage": "https://www.nscale.com/"},
+    "fal": {"aliases": ["fal", "fal.ai"], "domain": "fal.ai", "homepage": "https://fal.ai/", "pricing": "https://fal.ai/pricing"},
+    "Together AI": {"aliases": ["Together AI", "Together"], "domain": "together.ai", "homepage": "https://www.together.ai/", "pricing": "https://www.together.ai/pricing"},
+    "Baseten": {"aliases": ["Baseten"], "domain": "baseten.co", "homepage": "https://www.baseten.co/", "pricing": "https://www.baseten.co/pricing/"},
+    "Replicate": {"aliases": ["Replicate"], "domain": "replicate.com", "homepage": "https://replicate.com/", "pricing": "https://replicate.com/pricing"},
+    "Fireworks AI": {"aliases": ["Fireworks AI", "Fireworks"], "domain": "fireworks.ai", "homepage": "https://fireworks.ai/", "pricing": "https://fireworks.ai/pricing"},
+    "AWS": {"aliases": ["AWS", "Amazon Web Services", "Amazon Bedrock"], "domain": "aws.amazon.com", "homepage": "https://aws.amazon.com/bedrock/"},
+    "Google Cloud": {"aliases": ["Google Cloud", "Vertex AI", "GCP"], "domain": "cloud.google.com", "homepage": "https://cloud.google.com/vertex-ai"},
+    "Microsoft Azure": {"aliases": ["Microsoft Azure", "Azure", "Microsoft"], "domain": "azure.microsoft.com", "homepage": "https://azure.microsoft.com/en-us/solutions/ai"},
+    "OCI": {"aliases": ["Oracle Cloud Infrastructure (OCI)", "OCI", "Oracle"], "domain": "oracle.com", "homepage": "https://www.oracle.com/cloud/"}
+  },
+  "asset_type_keywords": {
+    "01": ["homepage", "home page", "hero"],
+    "02": ["product", "solution", "platform page", "service page"],
+    "03": ["industry", "media", "vertical", "m&e"],
+    "04": ["customer", "case study", "story"],
+    "05": ["launch", "blog", "announcement"],
+    "06": ["benchmark", "mlperf", "performance"],
+    "07": ["docs", "technical", "cookbook", "deep-dive"],
+    "08": ["whitepaper", "ebook", "report"],
+    "09": ["event", "webinar", "conference", "summit"],
+    "10": ["press"],
+    "11": ["pricing"],
+    "12": ["comparison", "migration", "vs"],
+    "14": ["ad", "paid", "linkedin", "google ads"],
+    "15": ["social", "x post", "youtube"],
+    "16": ["email", "newsletter"],
+    "17": ["partner"],
+    "18": ["clustermax", "validation", "analyst", "rating"],
+    "19": ["program", "startup"]
+  }
+}
