@@ -3,8 +3,14 @@
   "claude_bin": "claude",
   "codex_bin": "codex",
   "models": {
-    "claude": {"fast": "sonnet", "deep": "opus"},
-    "codex": {"fast": null, "deep": null}
+    "claude": {
+      "fast": "sonnet",
+      "deep": "opus"
+    },
+    "codex": {
+      "fast": null,
+      "deep": null
+    }
   },
   "parallel_calls": 6,
   "paths": {
@@ -16,7 +22,12 @@
     ],
     "writer_skill": "~/.claude/skills/nebius-marketing-writer",
     "runs_dir": "~/Documents/Nebius Artefacts/persona-committee",
-    "cache_dir": "~/.cache/persona-committee"
+    "cache_dir": "~/.cache/persona-committee",
+    "nebius_corpus": [
+      "~/Documents/Claude Code/Nebius Blog Markdown",
+      "~/Documents/Claude Code/Nebius Newsroom Markdown"
+    ],
+    "nebius_domain": "nebius.com"
   },
   "tavily": {
     "api_key_env": "TAVILY_API_KEY",
@@ -25,6 +36,14 @@
     "competitor_days": 90,
     "cache_hours": 24
   },
-  "pulse": {"items_per_persona": 5, "pause_for_review": true},
-  "committee": {"max_seats": 11, "rewrite_rounds": 2, "max_rewrite_lines": 5, "blind_competitors": 2}
+  "pulse": {
+    "items_per_persona": 5,
+    "pause_for_review": true
+  },
+  "committee": {
+    "max_seats": 11,
+    "rewrite_rounds": 2,
+    "max_rewrite_lines": 5,
+    "blind_competitors": 2
+  }
 }

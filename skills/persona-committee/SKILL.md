@@ -1,6 +1,6 @@
 ---
 name: persona-committee
-description: Run Nebius messaging past a synthetic buying committee of 11 evidence-based buyer personas (users such as Founder-CTO Farah and Inference Engineer Ingrid; buyers such as CFO Clara and CISO Cecil). Checks the live market with Tavily first (what changed in each buyer's world in 30 days, what competitors said in 90), shows that brief for approval, then runs private persona reviews, a blind test against competitor copy, a moderated debate, scoring with buyer vetoes, and rewrites by the Nebius marketing writer that the committee re-votes. Produces a Nebius-branded HTML report. Use when asked to test, pressure-test, review or get buyer feedback on messaging, a homepage, a landing page, a launch, an ad, a one-pager or any copy; or to "run the committee", "ask the personas" or "what would buyers think".
+description: Run Nebius messaging past a synthetic buying committee of 11 evidence-based buyer personas (users such as Founder-CTO Farah and Inference Engineer Ingrid; buyers such as CFO Clara and CISO Cecil). Checks what Nebius has published (blog and press corpus plus nebius.com) and the live market with Tavily first, shows that brief for approval, then scores every message with every persona, runs a blind test against competitor copy and a Slack-style committee thread, and hands weak lines to the Nebius marketing writer for rewrites grounded in published proof, which the committee re-votes. Produces a Nebius-branded HTML report: the score (annotated asset and message grid), the conversation, the rewrites, then an appendix. Use when asked to test, pressure-test, review or get buyer feedback on messaging, a homepage, a landing page, a launch, an ad, a one-pager or any copy; or to "run the committee", "ask the personas" or "what would buyers think".
 ---
 
 # Persona Committee
@@ -48,7 +48,7 @@ python3 scripts/committee.py review <run> [--probe]
 
 ### 4. Hand over
 - Give the user the report path (`report.html` in the run folder) and open it if they ask.
-- Summarize in five lines or fewer: the headline, the two biggest objections, the blind-test result, and which rewrites were recommended or blocked.
+- Summarize in five lines or fewer: the verdict, the top and bottom message in the grid, the two biggest objections, and which rewrites were recommended or blocked. Mention any correction where a reviewer assumed something Nebius's own record contradicts.
 - If the canary failed, say so first: the run was too agreeable and its praise should be discounted.
 
 ## Rules

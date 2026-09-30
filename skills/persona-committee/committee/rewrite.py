@@ -21,6 +21,8 @@ WRITE_SCHEMA = obj(rewrites=arr(obj(
     why=s("One or two plain sentences on what changed and why, without 'I' (e.g. 'Replaced the superlative with...')"),
     answers=arr(s("Name of a committee member whose objection this answers")),
     pattern_quote_id=s("Q id of the competitor example whose structure this borrows, or null", nullable=True),
+    support_ids=arr(s("N ids of the Nebius-published facts this line relies on")),
+    pillar=s(enum=["build_faster", "scale_with_confidence", "own_your_intelligence", "none"]),
     evidence=arr(s("Where each fact comes from, e.g. 'Company Messaging Framework 2.0, Page 8'")),
     placeholders=arr(s("Each [bracketed] item a human must fill with a sourced fact")),
 )))
@@ -93,6 +95,11 @@ def write(engine, cfg, lib, people, pulse, reviews, judge_out, pool, feedback=No
     meta = pulse["meta"]
     rules, nn, pb_name, pb, sources = _writer_rules(cfg, meta["asset_type"], lib)
     claim = {c["id"]: c["text"] for c in meta["claims"]}
+    pillar_of = {c["id"]: c.get("pillar", "none") for c in meta["claims"]}
+    facts = pulse.get("nebius", {})
+    npool = facts.get("pool", {})
+    unused_txt = "\n".join(f"{x['passage_id']} ({npool.get(x['passage_id'], {}).get('date') or 'recent'}): {x['quote']}"
+                            for x in facts.get("unused", []) + facts.get("standing", []))
     rows = []
     for t in judge_out["rewrite_targets"]:
         objs = []
@@ -101,12 +108,19 @@ def write(engine, cfg, lib, people, pulse, reviews, judge_out, pool, feedback=No
             if hit and hit["verdict"] != "lands":
                 objs.append(f"{people[pid].display}: {hit['why']}")
         fb = (feedback or {}).get(t["claim_id"])
-        rows.append(f"{t['claim_id']}: \"{claim.get(t['claim_id'], '')}\"\nPROBLEM: {t['problem']}\nTHE COMMITTEE ASKED FOR: {t['asks']}\n"
-                    f"OBJECTIONS:\n- " + "\n- ".join(objs[:6]) + (f"\nLAST ROUND FEEDBACK: {fb}" if fb else ""))
+        sup = [x for x in facts.get("supports", []) if x["claim_id"] == t["claim_id"]]
+        sup_txt = "\n".join(f"  {x['passage_id']} ({npool.get(x['passage_id'], {}).get('date') or 'recent'}): {x['quote']}" for x in sup)
+        rows.append(f"{t['claim_id']} [{pillar_of.get(t['claim_id'], 'none')}]: \"{claim.get(t['claim_id'], '')}\"\nPROBLEM: {t['problem']}\n"
+                    f"THE COMMITTEE ASKED FOR: {t['asks']}\n"
+                    f"OBJECTIONS:\n- " + "\n- ".join(objs[:6]) + (f"\nNEBIUS FACTS FOR THIS LINE:\n{sup_txt}" if sup_txt else "")
+                    + (f"\nLAST ROUND FEEDBACK: {fb}" if fb else ""))
     pats = "\n".join(f"{p['quote_id']} ({pool[p['quote_id']]['company']}): \"{pool[p['quote_id']]['quote']}\" "
                      f"PATTERN: {p['title']}. {p['explanation']}" for p in judge_out["patterns"] if p["quote_id"] in pool)
     system = ("You are the Nebius marketing writer. Follow the house rules, the playbook and the non-negotiables exactly. "
-              "Rewrite each flagged line so it answers the committee's objections. Keep each line close to the original length. "
+              "Rewrite each flagged line so it answers the committee's objections AND makes its Nebius value pillar shine "
+              "(Build faster, Scale with confidence, Own your intelligence). This is messaging, not a spec sheet: lead with what "
+              "the buyer gets, then the proof. Pull supporting points from the Nebius-published facts given (cite them in "
+              "support_ids). Keep each line close to the original length. "
               "Use only facts found in the claims sources, the house rules, the non-negotiables or the original line; use them "
               "wherever they fit (for example a rating the house rules name). Any fact you still need becomes a "
               "[bracketed placeholder], but a line may carry at most 3 placeholders and must read as finished copy a buyer "
@@ -115,11 +129,15 @@ def write(engine, cfg, lib, people, pulse, reviews, judge_out, pool, feedback=No
               "No em-dashes.\n\n# HOUSE RULES\n" + rules + "\n\n# NON-NEGOTIABLES\n" + nn +
               f"\n\n# PLAYBOOK ({pb_name})\n" + pb + "\n\n# CLAIMS SOURCES (the only allowed facts)\n" + sources)
     prompt = f"ASSET: {meta['title']} (asset type {meta['asset_type']})\n\nLINES TO REWRITE\n" + "\n\n".join(rows) + \
-             f"\n\nPATTERNS WORTH BORROWING (structure only)\n{pats or 'none'}"
+             f"\n\nPATTERNS WORTH BORROWING (structure only)\n{pats or 'none'}" + \
+             f"\n\nOTHER NEBIUS-PUBLISHED PROOF YOU MAY USE\n{unused_txt or 'none'}"
     out = engine.run(system, prompt, WRITE_SCHEMA, tier="deep", label="rewrite:writer")
+    fact_text = "\n".join(p.get("text", "") for p in npool.values())
     for rw in out["rewrites"]:
         rw["original"] = claim.get(rw["claim_id"], "")
-        rw["issues"], rw["lint"] = check(cfg, lib, rw, rw["original"], sources + "\n" + rules + "\n" + nn, meta["asset_type"])
+        rw["support_ids"] = [x for x in rw.get("support_ids", []) if x in npool]
+        rw["issues"], rw["lint"] = check(cfg, lib, rw, rw["original"], sources + "\n" + rules + "\n" + nn + "\n" + fact_text,
+                                         meta["asset_type"])
         if rw["pattern_quote_id"] not in pool:
             rw["pattern_quote_id"] = None
     return [rw for rw in out["rewrites"] if rw["claim_id"] in claim]

@@ -1,6 +1,11 @@
 # Report Style
 
-The report is read by busy marketers, product managers and executives. Write it the way a top journalist writes a front-page explainer: clear, specific, easy to follow, and worth reading.
+The report is read by busy marketers, product managers and executives. Write the way a sharp marketing leader reviews a draft for their team: clear, simple and bright. Confident, specific and kind to the reader's time. Page one must be readable in thirty seconds.
+
+## Page one
+- **Verdict:** one line, 14 words at most, that a CMO would say out loud. It names what is happening, not a score.
+- **What works / What fails / The one fix:** 20 words each, concrete, no hedging.
+- **Message notes:** 18 words at most. Say what the line does to the reader and what it is missing.
 
 ## Rules
 

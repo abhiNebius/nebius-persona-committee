@@ -37,8 +37,11 @@ Can this person tell, in one read, what is offered, to whom, and what to do next
 - **5:** Clear offer and audience. Next step is findable.
 - **7:** Instantly clear. I know what it is, if it's for me, and what to do.
 
+## Message scores
+Every numbered message gets its own 1 to 7: **7** you would forward the page for this line; **5** it moves you a little; **4** neutral; **2** it makes you trust the page less; **1** you would stop reading. Judge it as marketing: is it compelling to you, not only true.
+
 ## Claim verdicts
-For each numbered claim: **lands** (would move me), **weak** (true but doesn't move me), **fails** (I'd push back or stop reading).
+For each numbered message: **lands** (would move me), **weak** (true but doesn't move me), **fails** (I'd push back or stop reading).
 
 ## Veto (buyers only)
 A buyer vetoes a claim when it fails on believability in a way that would stop the deal: "Is that in the contract?" with no answer, a number with no baseline, a promise that shifts risk to the buyer.

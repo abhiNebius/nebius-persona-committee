@@ -62,7 +62,10 @@ flowchart TD
     W --> H[5. HTML report]
 ```
 
-### 0. Market Pulse: fixed identity, fresh knowledge
+### 0a. Nebius fact sweep
+Before anyone reviews the copy, the skill checks what Nebius itself has published: the local corpus of nebius.com blog posts and press releases (refreshed daily, newest weighted highest) plus a live Tavily search of nebius.com for the last 30 days. For each message it builds a small pack of verified facts, each a sentence quoted exactly from a dated, linked Nebius source. The personas never see it (they react only to the page, like a buyer). The market check, the conversation planner, the judge and the writer do, so the report never states something false about Nebius, flags where a reviewer assumed wrong, and grounds every rewrite in published proof.
+
+### 0b. Market Pulse: fixed identity, fresh knowledge
 The personas' identity (what they are measured on, their veto, their voice) stays fixed in the persona file. What they *know* is refreshed on every run.
 
 - **Claims.** A model breaks the asset into numbered claims, joining stat tiles with their captions ("112% better TCO for inference vs. AWS"). One deliberately weak **canary** line is hidden among them.
@@ -74,7 +77,7 @@ The personas' identity (what they are measured on, their veto, their voice) stay
 ### 1. Private reviews
 Each seated persona runs in its own model session with: its agent instructions, its "what keeps me up at night" and real voice quotes, the scoring rubric, its own live items, the copy, the numbered claims, and a **blind comparison**: Nebius's claims and two competitors' verbatim copy, names removed, shuffled into Vendor A, B, C.
 
-Each returns scores on five criteria with a one-sentence reason each, a verdict on every claim, the stopping objection and the deal stage it bites, whether they would take the meeting, one rewrite, one recommendation, and the blind ranking.
+Each returns a 1 to 7 score and a one-line reason for **every message** (these fill the grid), scores on five criteria, the stopping objection and the deal stage it bites, whether they would take the meeting, one rewrite, one recommendation, and the blind ranking.
 
 | Criterion | The question |
 |---|---|
@@ -84,8 +87,8 @@ Each returns scores on five criteria with a one-sentence reason each, a verdict 
 | Stands out | Is it different from what competitors say? |
 | Clear | Can they tell what is offered, to whom, in one read? |
 
-### 2. Debate
-After private scores are locked, a moderator picks three points: the most disputed claim, a challenge from the live market or a competitor move, and a believability test where a buyer challenges what users liked. Three personas speak on each point in turn. Each sees earlier replies as "Member A, B" without names, because agents conform when they know who is talking. A persona may change a score only for a reason it had not considered, and the report shows every change.
+### 2. The conversation
+After private scores are locked, a planner picks three Slack threads: the most disputed message, a live market or competitor moment, and a believability test where a buyer pushes on something users liked. A persona opens each thread by quoting the line; others reply by name, 4 to 6 turns, each its own model call that sees the thread so far. Style rules (`references/conversation-style.md`) keep messages short and human: no speeches, stacked questions, asides, the occasional "tbh". Scores were locked before the thread, so peer pressure cannot change the grid; any change of mind is shown.
 
 ### 3. Judge
 Numbers are computed in code, never by a model:
@@ -106,16 +109,14 @@ The weakest and most-vetoed lines go to the Nebius marketing writer: its house r
 The committee re-votes blind (old and new in random order). Users decide which wins. Any buyer who marks the new line not believable blocks it. Lines that lose go back to the writer once more with the committee's reasons.
 
 ### 5. The report
-One self-contained HTML file in Nebius colors, written to a journalist's standard (`references/report-style.md`): the point first, short sentences, literal excerpts instead of abstract patterns.
+One self-contained HTML file in Nebius colors, written like a marketing leader reviewing a draft: clear, simple, bright, with hard word limits on page one. Three parts, then a collapsible appendix.
 
-| Page | Contents |
+| Part | Contents |
 |---|---|
-| 1 Verdict | Headline, "what changed this month" strip, scorecard (users, then buyers) |
-| 2 Dialog | The debate as speech bubbles (name under each bubble, role in italics), source chips for live items, score changes, each persona's one recommendation |
-| 3 Ranking | Personas ranked, claim-by-claim verdicts and vetoes, honesty checks, product problems copy cannot fix |
-| 4 Competitive view | Blind test, who was behind each label, claim-by-competitor overlap with literal quotes, competitor page changes, patterns worth borrowing |
-| 5 Proposed changes | Before and after, why, who it answers, the example it borrows, evidence, placeholders, scores before and after |
-| Method and sources | Steps, limits, the live items used, **every link the market sweep found** (grouped by persona reading list, market news, competitor newsrooms, competitor pages checked), run details and cost |
+| **1 The score** | A one-line verdict, then What works / What fails / The one fix. The asset itself, annotated: a screenshot of the live page with numbered markers on each message (or, for a text asset, the text in a light frame with the same markers), next to a crisp note and user and buyer scores for each message. Value-pillar coverage (Build faster, Scale with confidence, Own your intelligence). The grid: every message ranked, one column per persona |
+| **2 The conversation** | A Slack-style thread: people quote the line, reply by name, push back, change their minds. Styled on the rhythm of real work threads |
+| **3 The rewrites** | Before and after for each weak line, the Nebius-published fact behind it (quoted, linked, dated), the pillar it lifts, the blind re-vote. Proof we have published but the asset does not use. Where a reviewer assumed something our own record contradicts |
+| Appendix | Competitive view (blind test, who else says it, patterns worth borrowing), market pulse, persona scores and objections, honesty checks, method and limits, every source |
 
 ## Install
 

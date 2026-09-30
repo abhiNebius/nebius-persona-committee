@@ -7,6 +7,7 @@
 """
 import random
 
+from . import nebius as NB
 from . import personas as PS
 from .tavily import tier
 from .util import arr, b, clean, norm, obj, s, today, untrusted, write_json
@@ -27,7 +28,10 @@ CLAIMS_SCHEMA = obj(
     product_line=s(enum=PRODUCT_LINES),
     motion=s(enum=MOTIONS),
     summary=s("One plain sentence: what this asset is trying to say"),
-    claims=arr(obj(text=s("Exact line from the asset, copied verbatim"),
+    claims=arr(obj(text=s("The message, in the asset's own words"),
+                   label=s("Two to four words naming the element, e.g. 'Hero headline', 'Reliability stat', 'Pillar: Predictable'"),
+                   part=s(enum=["headline", "subhead", "pillar", "proof", "body", "cta"]),
+                   pillar=s(enum=["build_faster", "scale_with_confidence", "own_your_intelligence", "none"]),
                    kind=s(enum=["number", "superlative", "capability", "positioning", "proof", "cta"]))),
     topics=arr(s("A 3 to 7 word web search phrase about the market topic, no vendor names")),
     competitors_named=arr(s()),
@@ -58,7 +62,11 @@ GRADE_SCHEMA = obj(
 
 
 def extract_claims(engine, asset_text):
-    system = ("You are a senior editor. You break marketing copy into the claims it makes. "
+    system = ("You are a senior product marketing editor. You break marketing copy into its message units: the headline, "
+              "the subhead, each value pillar and the line that carries it, the proof points and the call to action. Grade the "
+              "messaging, not only the technical claims. Tag each unit with the Nebius value pillar it serves: build_faster "
+              "(dev-first, frontier-ready platform), scale_with_confidence (predictable capacity, performance and economics), "
+              "own_your_intelligence (open-model choice and full-stack control), or none. "
               "Copy each claim using the asset's own words. A number shown apart from its caption (a stat tile such as "
               "'43%' above 'better TCO for inference vs. AWS') is one claim: join them as '43% better TCO for inference vs. AWS'. "
               "Never list a bare number on its own. Keep at most 10, most important first. "
@@ -72,7 +80,7 @@ def extract_claims(engine, asset_text):
     claims = [c for c in out["claims"] if c["text"].strip()][:10]
     canary = random.choice(CANARIES)
     pos = random.randint(1, max(1, len(claims)))
-    claims.insert(pos, {"text": canary, "kind": "superlative"})
+    claims.insert(pos, {"text": canary, "kind": "superlative", "label": "Supporting line", "part": "body", "pillar": "none"})
     for n, c in enumerate(claims, 1):
         c["id"] = f"C{n}"
     out["claims"] = claims
@@ -151,7 +159,7 @@ def gather(cfg, tav, lib, people, seat, meta):
     return merged, pages, comps
 
 
-def grade(engine, cfg, people, seat, meta, results, pages):
+def grade(engine, cfg, people, seat, meta, results, pages, facts_text="none"):
     claims = "\n".join(f"{c['id']}: {c['text']}" for c in meta["claims"] if c["id"] != meta["canary_id"])
     roster = "\n".join(f"{pid} {people[pid].display}: {people[pid].tagline}" for pid in seat)
     res = "\n\n".join(
@@ -170,8 +178,12 @@ def grade(engine, cfg, people, seat, meta, results, pages):
         "does not have yet, 'stale' if it shows a concern has faded. Write in short, plain sentences. No em-dashes. "
         f"Return at most {cfg['pulse']['items_per_persona']} items per persona and at most 18 items in total. "
         "For competitor pages, say plainly whether the messaging changed since the library snapshot (Sept 28). "
-        "new_line must be copied exactly from the live page text, or null. For claim checks, cover each claim.")
+        "new_line must be copied exactly from the live page text, or null. For claim checks, cover each claim. "
+        "VERIFIED NEBIUS FACTS are what Nebius has published. Never write anything that contradicts them, and never say "
+        "Nebius lacks something they show it has. If a claim is supported by them, the status is 'holds'; if the asset simply "
+        "omits a published proof, say the page does not show it.")
     prompt = (f"ASSET: {meta['title']} ({meta['summary']})\n\nCLAIMS:\n{claims}\n\nCOMMITTEE:\n{roster}\n\n"
+              f"VERIFIED NEBIUS FACTS:\n{facts_text}\n\n"
               f"SEARCH RESULTS:\n{res or 'none'}\n\nCOMPETITOR PAGES:\n{comp or 'none'}")
     return engine.run(system, prompt, GRADE_SCHEMA, tier="deep", label="pulse:grade")
 
@@ -181,7 +193,8 @@ def build(cfg, engine, tav, lib, people, asset_text, source_label, motion=None, 
     if motion:
         meta["motion"] = motion
     seat = PS.seat(people, cfg, meta["motion"], meta["asset_type"], seat_override)
-    pulse = {"date": today(), "source": source_label, "meta": meta, "seat": seat,
+    facts = NB.sweep(cfg, engine, tav, meta)
+    pulse = {"date": today(), "source": source_label, "meta": meta, "seat": seat, "nebius": facts,
              "live_check": tav.available, "items": [], "competitor_changes": [], "claim_checks": [],
              "competitors": [], "pages": [], "results": []}
     if not tav.available:
@@ -195,7 +208,7 @@ def build(cfg, engine, tav, lib, people, asset_text, source_label, motion=None, 
     if not results and not any(p_["live_text"] for p_ in pages):
         pulse["banner"] = "Live market check returned nothing: " + "; ".join(tav.errors[:2])
         return pulse
-    g = grade(engine, cfg, people, seat, meta, results, pages)
+    g = grade(engine, cfg, people, seat, meta, results, pages, NB.brief(facts))
     ref = {r["id"]: r for r in results}
     live_texts = {p_["url"]: p_["live_text"] for p_ in pages}
     per = {}

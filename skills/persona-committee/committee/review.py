@@ -21,7 +21,9 @@ BUYING COMMITTEE REVIEW: RULES FOR THIS SESSION
 - "This week in your world" lists real items from sources you read. You may mention them naturally
   ("I saw on SemiAnalysis last week...") and must list their IDs in pulse_used. Never invent news, numbers or quotes.
 - Score each criterion 1 to 7 using the anchors below. Every score needs a one-sentence reason in your voice.
-- Mark every numbered claim: lands, weak or fails.
+- Score every numbered message 1 to 7 (7: this would make you forward the page; 4: neutral; 1: you would stop reading),
+  and mark it lands, weak or fails. Judge the message as marketing: does it make the offer compelling to you, not only
+  is it technically true.
 - In the blind comparison you see three vendors with names removed. Rank them honestly.
 - Keep every text field short: one to three sentences. Plain words. No em-dashes.
 """
@@ -32,7 +34,8 @@ def _schema(labels):
     return obj(
         first_reaction=s("Two or three sentences, in your voice"),
         scores=obj(**{k: crit for k in CRITERIA}),
-        claims=arr(obj(claim_id=s(), verdict=s(enum=["lands", "weak", "fails"]), why=s())),
+        claims=arr(obj(claim_id=s(), score=i("1 to 7: how much this message moves you", lo=1, hi=7),
+                       verdict=s(enum=["lands", "weak", "fails"]), why=s("One short sentence in your voice, 20 words at most"))),
         stopping_objection=obj(text=s("The one thing that would stop you"),
                                stage=s("When it bites: first look, evaluation, POC, security review, contract, renewal")),
         missing=arr(s()),

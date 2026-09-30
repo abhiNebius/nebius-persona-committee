@@ -24,7 +24,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from committee import config as C  # noqa: E402
-from committee import debate, judge, pulse as PU, render, review, rewrite  # noqa: E402
+from committee import debate, judge, pulse as PU, render, review, rewrite, snap  # noqa: E402
 from committee.engine import Engine  # noqa: E402
 from committee.library import Library  # noqa: E402
 from committee.personas import load as load_personas  # noqa: E402
@@ -73,7 +73,10 @@ def cmd_pulse(args, cfg, pause=True):
     asset_text, label = load_asset(args.asset, tav)
     if len(asset_text.strip()) < 40:
         raise SystemExit("The asset is empty or too short to review.")
-    tmp = run_dir_for(cfg, "pending")
+    import tempfile
+    base = C.path(cfg, "runs_dir")
+    base.mkdir(parents=True, exist_ok=True)
+    tmp = Path(tempfile.mkdtemp(prefix="pending-", dir=base))  # unique, so parallel runs never collide
     eng = Engine(cfg, args.engine, tmp / "calls.jsonl")
     people, lib = load_personas(cfg), Library(cfg)
     seat = [x for x in (args.seat or "").split(",") if x] or None
@@ -88,6 +91,13 @@ def cmd_pulse(args, cfg, pause=True):
         shutil.move(str(f), rd / f.name)
     tmp.rmdir()
     (rd / "asset.txt").write_text(asset_text, encoding="utf-8")
+    if re.match(r"https?://", args.asset) and not pulse.get("snapshot"):
+        meta = pulse["meta"]
+        msgs = [c for c in meta["claims"] if c["id"] != meta["canary_id"]]
+        shot = snap.capture(args.asset, {c["id"]: c["text"] for c in msgs}, rd / "asset.jpg",
+                            numbers={c["id"]: n for n, c in enumerate(msgs, 1)})
+        if shot:
+            pulse["snapshot"] = {"image": "asset.jpg", "boxes": shot["boxes"], "width": shot["width"], "height": shot["height"]}
     pulse["approved"] = not pause
     PU.save(rd, pulse, people)
     write_json(rd / "run.json", {"run_id": rd.name, "date": today(), "engine": eng.name, "stage": "pulse",
@@ -117,14 +127,19 @@ def cmd_review(args, cfg, rd=None):
     people, lib = load_personas(cfg), Library(cfg)
     asset_text = (rd / "asset.txt").read_text(encoding="utf-8")
 
-    vendors = review.blind_set(cfg, lib, pulse)
-    write_json(rd / "vendors.json", vendors)
-    print("Private reviews ...", file=sys.stderr)
-    reviews, errors, probe = review.run(eng, people, pulse, asset_text, vendors, probe=args.probe)
-    if not reviews:
-        raise SystemExit(f"Every persona review failed: {errors}")
-    write_json(rd / "reviews.json", {"reviews": reviews, "errors": errors, "probe": probe})
-    print("Debate ...", file=sys.stderr)
+    if getattr(args, "from_thread", False) and (rd / "reviews.json").exists():
+        vendors = read_json(rd / "vendors.json")
+        saved = read_json(rd / "reviews.json")
+        reviews, errors, probe = saved["reviews"], saved["errors"], saved.get("probe")
+    else:
+        vendors = review.blind_set(cfg, lib, pulse)
+        write_json(rd / "vendors.json", vendors)
+        print("Private reviews ...", file=sys.stderr)
+        reviews, errors, probe = review.run(eng, people, pulse, asset_text, vendors, probe=args.probe)
+        if not reviews:
+            raise SystemExit(f"Every persona review failed: {errors}")
+        write_json(rd / "reviews.json", {"reviews": reviews, "errors": errors, "probe": probe})
+    print("Conversation ...", file=sys.stderr)
     deb = debate.run(eng, people, pulse, reviews)
     write_json(rd / "debate.json", deb)
     print("Judge ...", file=sys.stderr)
@@ -165,6 +180,7 @@ def cmd_render(args, cfg, rd=None, tav_status=None):
     tav_status = tav_status or runinfo.get("tavily", {})
     rv = read_json(rd / "reviews.json")
     ctx = {"people": load_personas(cfg), "pulse": read_json(rd / "pulse.json"), "reviews": rv["reviews"],
+           "run_dir": rd, "asset_text": (rd / "asset.txt").read_text(encoding="utf-8") if (rd / "asset.txt").exists() else "",
            "probe": rv.get("probe"), "debate": read_json(rd / "debate.json"), "numbers": read_json(rd / "numbers.json"),
            "judge": read_json(rd / "judge.json"), "pool": read_json(rd / "pool.json"),
            "vendors": read_json(rd / "vendors.json"), "rewrites": read_json(rd / "rewrites.json"),
@@ -173,7 +189,7 @@ def cmd_render(args, cfg, rd=None, tav_status=None):
                    "tavily_calls": tav_status.get("calls", 0), "tavily_cached": tav_status.get("cache_hits", 0)}}
     out = rd / "report.html"
     out.write_text(render.render(ctx), encoding="utf-8")
-    print(json.dumps({"run": rd.name, "report": str(out), "headline": ctx["judge"]["headline"],
+    print(json.dumps({"run": rd.name, "report": str(out), "verdict": ctx["judge"]["verdict"],
                       "canary_pass": ctx["numbers"]["canary"]["pass"],
                       "rewrites": {r["claim_id"]: r["vote"]["status"] for r in ctx["rewrites"]}}, indent=2))
     return out
@@ -204,6 +220,8 @@ def main():
     r.add_argument("run")
     r.add_argument("--probe", action="store_true")
     r.add_argument("--force", action="store_true")
+    r.add_argument("--from-thread", dest="from_thread", action="store_true",
+                   help="Keep the saved private reviews; redo the conversation, judge, rewrites and report")
     for name in ("render", "status", "rewrite"):
         sub.add_parser(name).add_argument("run")
     args = ap.parse_args()

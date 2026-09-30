@@ -44,6 +44,9 @@ No custom GPTs. Distribution is the skill folder, installed into Claude Code (`~
 | D12 | Nebius has no call recordings or customer interview corpus. This is stated as a known gap everywhere the personas are presented | 2026-09-30 |
 | D13 | The report is written for busy marketers: short sentences, literal competitor excerpts instead of abstract patterns, plain criteria names | 2026-09-30 |
 | D14 | Every link the market sweep finds is kept: a sources section in the report, `sources.csv` per run, and a cross-run `sources-ledger.csv` | 2026-09-30 |
+| D16 | A Nebius fact sweep (local blog and press corpus plus nebius.com via Tavily) runs before every review; nothing in the report may contradict it | 2026-09-30 |
+| D17 | Report is three parts: the score (annotated asset, message-by-persona grid, pillar coverage), the conversation (Slack-style), the rewrites (grounded in Nebius-published proof). Everything else is a collapsible appendix | 2026-09-30 |
+| D18 | Grade the value-pillar messaging, not only technical claims | 2026-09-30 |
 | D15 | Package both skills (`persona-committee`, `nebius-marketing-writer`) in one private GitHub repo with an install script for Claude Code and Codex | 2026-09-30 |
 
 ## 4. Architecture
