@@ -163,7 +163,7 @@ def write(engine, cfg, people, pulse, reviews, debate, numbers, pool):
               "copy only by Q id and Nebius facts only by N id, in the id fields; never mention ids in prose. Mark a message "
               "table_stakes if two or more competitors say the same thing, contested if one does, open_lane if none. Rewrite "
               "targets: at most 5, headline and pillar lines first, then the weakest and most vetoed. No em-dashes.\n\n"
-              "STYLE GUIDE\n" + C.reference("report-style.md"))
+              "STYLE GUIDE\n" + C.reference("report-style.md") + "\n\nTHE NEBIUS VOICE (write all prose this way)\n" + C.reference("nebius-voice.md"))
     prompt = (f"ASSET: {meta['title']}: {meta['summary']}\n\nMESSAGE GRID (ranked by users first)\n{grid}\n\n"
               f"WHAT EACH PERSONA SAID PER MESSAGE\n{why}\n\nSTOPPERS\n{stops}\n\nTHE THREAD\n{deb or 'none'}\n\n"
               f"BLIND TEST\n{blind_txt}\n\nLIVE ITEMS\n{items or 'none'}\n\n"

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Builds the Confluence page that lists every persona, from the persona library.
 
-  persona_page.py > personas.storage.html     Confluence storage format (XHTML)
+  persona_page.py > personas.storage.html          Confluence storage format (XHTML)
+  persona_page.py --icons > personas.storage.html  same, with persona icons (attachments persona-P01.png ...)
 
 Each persona gets an anchor (P01 ... P11) so reports can link straight to it.
 Internal evidence references ("[internal: ...]") are stripped; the page links back to nothing private.
@@ -73,6 +74,14 @@ def _roster(lib):
     return out
 
 
+def _icon(pid, height):
+    return (f'<ac:image ac:height="{height}" ac:alt="{pid}"><ri:attachment ri:filename="persona-{pid}.png" /></ac:image>'
+            if ICONS else "")
+
+
+ICONS = False
+
+
 def build(cfg):
     people = load(cfg)
     lib = C.path(cfg, "persona_library")
@@ -88,7 +97,7 @@ def build(cfg):
          '<table><tbody><tr><th>#</th><th>Persona</th><th>Group</th><th>Role in the deal</th><th>The one thing they want</th></tr>']
     for pid, p in people.items():
         r = roster.get(pid, {})
-        h.append(f'<tr><td>{pid}</td><td><ac:link ac:anchor="{pid}"><ac:plain-text-link-body><![CDATA[{p.display}]]>'
+        h.append(f'<tr><td>{_icon(pid, 36)} {pid}</td><td><ac:link ac:anchor="{pid}"><ac:plain-text-link-body><![CDATA[{p.display}]]>'
                  f'</ac:plain-text-link-body></ac:link></td><td>{"User" if p.group == "users" else "Buyer"}</td>'
                  f'<td>{E(r.get("role_in_deal", p.buying_role))}</td><td>{E(r.get("want", ""))}</td></tr>')
     h.append('</tbody></table>')
@@ -108,6 +117,9 @@ def build(cfg):
             g = _glance(body)
             r = roster.get(pid, {})
             h.append(f'<ac:structured-macro ac:name="anchor"><ac:parameter ac:name="">{pid}</ac:parameter></ac:structured-macro>')
+            if ICONS:  # Confluence does not render images inside headings: float the icon left, beside the title
+                h.append(f'<p><ac:image ac:align="left" ac:layout="align-start" ac:width="64" ac:alt="{pid}">'
+                         f'<ri:attachment ri:filename="persona-{pid}.png" /></ac:image></p>')
             h.append(f'<h3>{E(p.display)}</h3><p><em>{_text(p.tagline)}</em></p><table><tbody>')
             for label, key in (("Titles they go by", "Titles this persona goes by"), ("Role in the deal and veto", "Buying role and veto"),
                                ("Joins the deal", "Enters the deal at"), ("Measured on", "Measured on (KPIs)"),
@@ -134,4 +146,5 @@ def build(cfg):
 
 
 if __name__ == "__main__":
+    ICONS = "--icons" in sys.argv
     print(build(C.load()))

@@ -18,13 +18,14 @@ A rewrite over its limit fails the checks and goes back to the writer once.
 
 ## Structure
 
-1. **One claim, one proof.** Each line makes one claim and backs it with one proof: one number (with its baseline, if it is a comparison), one named customer or one third-party rating. Never stack two or three proofs. The check allows up to three figures, so a ratio plus its two sides still counts as one proof. Spare proof goes in `also_proof`, not in the line.
+0. **Write in the Nebius voice** (`references/nebius-voice.md`): a short title, one flowing sentence about what the reader gets, and the proof in a stat tile beside it.
+1. **One claim, one proof.** Each line makes one claim and backs it with one proof: one number (with its baseline, if it is a comparison), one named customer or one third-party rating. Never stack two or three proofs. The check allows up to three figures, so a ratio plus its two sides still counts as one proof. The proof goes in the stat tile (`tile_figure`, `tile_label`) wherever the asset has room for one, not inside the sentence. Spare proof goes in `also_proof`.
 2. **Outcome first, proof second.** Lead with what the buyer gets ("Clusters that heal themselves"), then the proof ("rated Platinum in SemiAnalysis ClusterMAX 3.0"). Never open with the mechanism.
 3. **Headlines state a position, not a credential.** A headline answers "better at what, for whom?" A rating or award supports the headline from the subhead or a proof line; it does not replace it.
 4. **Translate specs into meaning.** A raw spec ("603,023 tokens/s") is only acceptable in copy for engineers, and even then it needs what it means for them. If you cannot say what the number does for the reader, it is not ready to be a headline proof.
 5. **Keep the asset's frame.** If the original has a pillar title ("Raw power. No surprises."), keep the title when it still works and rewrite the body.
 6. **Two sentences at most.** Most lines are one.
-7. **No parenthetical dates or citations in the copy itself.** "(September 2026)" goes in the evidence, not the line.
+7. **No colon formulas, no parenthetical dates or citations in the copy itself.** "(September 2026)" goes in the evidence, not the line.
 8. **One customer per line.** "Higgsfield started its first training run in under an hour." Not Higgsfield and Chatfuel.
 
 ## Still non-negotiable

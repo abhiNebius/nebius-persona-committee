@@ -108,6 +108,9 @@ The weakest and most-vetoed lines go to the Nebius marketing writer: its house r
 
 The committee re-votes blind (old and new in random order). Users decide which wins. Any buyer who marks the new line not believable blocks it. Lines that lose go back to the writer once more with the committee's reasons.
 
+### 4a. The Nebius voice
+Rewrites and report prose follow `references/nebius-voice.md`, distilled from the Nebius PMM team's own copy (the September 2026 customer deck, the homepage and the AI Cloud one-pager). A value prop is a short title, one flowing sentence about what the reader gets, and a **stat tile** that carries the proof beside the copy, the way the customer deck lays out "20x / FASTER TRAINING, FROM MONTHS TO SIX WEEKS". Code rejects the patterns that read as machine-written: the "Title: proof" colon formula, parenthetical dates and spec lists.
+
 ### 4b. Rewrite rules
 Proposed copy must be usable as is. `references/rewrite-rules.md` (set with a PMM Sherpa review of the first runs, then checked against the house rules) caps each element type (headline 8 words on the web, pillar 25, proof 14, CTA 5; slightly more for one-pagers), allows one claim and one proof per line, puts the outcome before the proof, and makes headlines state a position rather than a credential. Code enforces the word limits, a two-sentence cap, one placeholder per line and no stacked figures. Spare proof is kept in a separate "other proof that fits" list instead of being crammed in.
 
@@ -118,13 +121,13 @@ One self-contained HTML file in Nebius colors, written like a marketing leader r
 |---|---|
 | **1 The score** | A one-line verdict, then What works / What fails / The one fix. The asset itself, annotated: a screenshot of the live page with numbered markers on each message (or, for a text asset, the text in a light frame with the same markers), next to a crisp note and user and buyer scores for each message. Value-pillar coverage (Build faster, Scale with confidence, Own your intelligence). The grid: every message ranked, one column per persona |
 | **2 The conversation** | A Slack-style thread: people quote the line, reply by name, push back, change their minds. Styled on the rhythm of real work threads |
-| **3 The rewrites** | Before and after for each weak line, the Nebius-published fact behind it (quoted, linked, dated), the pillar it lifts, the blind re-vote. Proof we have published but the asset does not use. Where a reviewer assumed something our own record contradicts |
+| **3 The rewrites** | Before and after for each weak line, with its stat tile, the Nebius-published fact behind it (quoted, linked, dated), the pillar it lifts, the blind re-vote. Proof we have published but the asset does not use. Where a reviewer assumed something our own record contradicts |
 | Appendix | Competitive view (blind test, who else says it, patterns worth borrowing), market pulse, persona scores and objections, honesty checks, method and limits, every source |
 
 Every score is labeled **out of 7**, with a colour key. Persona names link to their entry on the Confluence persona page (`persona_page_url` in config).
 
 ### The persona page on Confluence
-`scripts/persona_page.py` builds a Confluence page from the persona library: a roster, who to seat for each deal type, and for each persona the titles they go by, role and veto, when they join the deal, what they are measured on, what keeps them up at night, what earns their trust and how to message them. Each persona has an anchor (`#P01` to `#P11`). Live page: *Nebius Buyer Personas (Persona Committee)*, under The Media & Entertainment Marketing Hub.
+`scripts/persona_page.py` builds a Confluence page from the persona library: a roster, who to seat for each deal type, and for each persona the titles they go by, role and veto, when they join the deal, what they are measured on, what keeps them up at night, what earns their trust and how to message them. Each persona has an anchor (`#P01` to `#P11`) and, with `--icons`, its icon in the roster and beside its section title (`assets/personas/`, uploaded as page attachments `persona-P01.png` ...). Live page: *Nebius Buyer Personas (Persona Committee)*, under The Media & Entertainment Marketing Hub.
 
 ## Install
 

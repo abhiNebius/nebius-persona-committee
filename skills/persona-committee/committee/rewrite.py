@@ -17,7 +17,11 @@ from .util import arr, i, obj, s, shingles, words
 
 WRITE_SCHEMA = obj(rewrites=arr(obj(
     claim_id=s(),
-    proposed=s("The new line, ready to publish except for [bracketed placeholders]"),
+    proposed=s("The new copy in the Nebius voice: for a pillar, the short title then one flowing sentence "
+               "(e.g. 'Raw power. No surprises. Clusters that find and fix their own failures, so long runs keep running.'). "
+               "No colon formula, no proof wedged in, no parenthetical dates"),
+    tile_figure=s("The proof as a stat-tile figure, e.g. '20x', '$1M+', 'Platinum', '<1 hour'; or null", nullable=True),
+    tile_label=s("The stat-tile label, 3 to 8 words, e.g. 'FASTER TRAINING, FROM MONTHS TO SIX WEEKS'; or null", nullable=True),
     why=s("One or two plain sentences on what changed and why, without 'I' (e.g. 'Replaced the superlative with...')"),
     answers=arr(s("Name of a committee member whose objection this answers")),
     pattern_quote_id=s("Q id of the competitor example whose structure this borrows, or null", nullable=True),
@@ -92,9 +96,21 @@ def check(cfg, lib, rw, original, sources_text, asset_type, part="body", medium=
     n_words = len(rw["proposed"].split())
     if n_words > lim:
         issues.append(f"Too long for a {part}: {n_words} words (limit {lim})")
-    sentences = [x for x in re.split(r"(?<=[.!?])\s+", rw["proposed"].strip()) if x]
+    # short title fragments ("Your models. Your stack.") are part of the Nebius voice and do not count
+    sentences = [x for x in re.split(r"(?<=[.!?])\s+", rw["proposed"].strip()) if len(x.split()) > 4]
     if len(sentences) > 2:
         issues.append(f"{len(sentences)} sentences (limit 2)")
+    if re.search(r"^[^.:]{3,70}:\s+\S", rw["proposed"]) and not re.match(r"^\[", rw["proposed"]):
+        issues.append("Colon formula ('Title: proof'); write the title, then one flowing sentence")
+    if re.search(r"\((?:as of |in )?(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.? \d{4}\)", rw["proposed"]):
+        issues.append("Parenthetical date in the copy; move it to the evidence")
+    if rw["proposed"].count(",") >= 4:
+        issues.append("Reads like a spec list; keep the one point that matters")
+    tile = " ".join(x for x in (rw.get("tile_figure"), rw.get("tile_label")) if x)
+    if tile:
+        bad_t = sorted(n for n in _numbers(tile) if n not in _numbers(original) | _numbers(sources_text))
+        if bad_t:
+            issues.append("Stat tile numbers not found in the sources: " + ", ".join(bad_t))
     if len(_metrics(rw["proposed"])) > 3:  # a figure, its unit count and a baseline is still one proof
         issues.append("Stacks several figures; keep one proof per line and move the rest to also_proof")
     comp = set().union(*(shingles(ln) for _, ln in lib.corpus())) if lib.entries else set()
@@ -142,9 +158,10 @@ def write(engine, cfg, lib, people, pulse, reviews, judge_out, pool, feedback=No
                     + (f"\nLAST ROUND FEEDBACK: {fb}" if fb else ""))
     pats = "\n".join(f"{p['quote_id']} ({pool[p['quote_id']]['company']}): \"{pool[p['quote_id']]['quote']}\" "
                      f"PATTERN: {p['title']}. {p['explanation']}" for p in judge_out["patterns"] if p["quote_id"] in pool)
-    system = ("You are the Nebius marketing writer. Follow the REWRITE RULES first, then the house rules, the playbook and "
-              "the non-negotiables. Usable beats complete: one claim, one proof, within the word limit for the element "
-              f"type on a {medium}. "
+    system = ("You are a Nebius product marketing writer. Write in THE NEBIUS VOICE below: confident, warm, flowing, the "
+              "way the Nebius PMM team writes its homepage, customer deck and one-pagers. Then follow the REWRITE RULES, the "
+              "house rules, the playbook and the non-negotiables. Each rewrite is copy plus, where it helps, a stat tile that "
+              f"carries the proof, so the copy itself can read smoothly. Stay within the word limit for the element type on a {medium}. "
               "Rewrite each flagged line so it answers the committee's objections AND makes its Nebius value pillar shine "
               "(Build faster, Scale with confidence, Own your intelligence). This is messaging, not a spec sheet: lead with what "
               "the buyer gets, then the proof. Pull supporting points from the Nebius-published facts given (cite them in "
@@ -154,7 +171,7 @@ def write(engine, cfg, lib, people, pulse, reviews, judge_out, pool, feedback=No
               "[bracketed placeholder], but a line may carry at most 3 placeholders and must read as finished copy a buyer "
               "would see on the page, not a template. Prefer a shorter, fully sourced line over a longer bracketed one. "
               "Competitor examples show structure only: never reuse their wording. "
-              "No em-dashes.\n\n# REWRITE RULES\n" + C.reference("rewrite-rules.md") + "\n\n# HOUSE RULES\n" + rules + "\n\n# NON-NEGOTIABLES\n" + nn +
+              "No em-dashes.\n\n# THE NEBIUS VOICE\n" + C.reference("nebius-voice.md") + "\n\n# REWRITE RULES\n" + C.reference("rewrite-rules.md") + "\n\n# HOUSE RULES\n" + rules + "\n\n# NON-NEGOTIABLES\n" + nn +
               f"\n\n# PLAYBOOK ({pb_name})\n" + pb + "\n\n# CLAIMS SOURCES (the only allowed facts)\n" + sources)
     prompt = f"ASSET: {meta['title']} (asset type {meta['asset_type']})\n\nLINES TO REWRITE\n" + "\n\n".join(rows) + \
              f"\n\nPATTERNS WORTH BORROWING (structure only)\n{pats or 'none'}" + \
@@ -179,7 +196,8 @@ def vote(engine, people, pulse, reviews, rewrites):
     for rw in rewrites:
         flip = random.random() < 0.5
         order[rw["claim_id"]] = flip
-        a, b_ = (rw["proposed"], rw["original"]) if flip else (rw["original"], rw["proposed"])
+        new_txt = rw["proposed"] + (f"  [stat tile: {rw['tile_figure']} | {rw.get('tile_label') or ''}]" if rw.get("tile_figure") else "")
+        a, b_ = (new_txt, rw["original"]) if flip else (rw["original"], new_txt)
         lines.append(f"{rw['claim_id']}\n  A: {a}\n  B: {b_}")
     prompt = ("Two versions of each line follow, in random order. For each, say which you prefer, score both 1 to 7 "
               "overall, and say whether each is believable to you. Judge each line as it would read on the page today. "

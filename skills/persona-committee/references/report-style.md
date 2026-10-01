@@ -7,6 +7,9 @@ The report is read by busy marketers, product managers and executives. Write the
 - **What works / What fails / The one fix:** 20 words each, concrete, no hedging.
 - **Message notes:** 18 words at most. Say what the line does to the reader and what it is missing.
 
+## Voice
+Write every sentence in the Nebius voice (`nebius-voice.md`): complete, flowing sentences with a confident, warm rhythm, the way the Nebius PMM team writes. Short is good; clipped, robotic or colon-chained is not.
+
 ## Rules
 
 1. **Lead with the point.** The first sentence of every section says what happened. Detail comes after.

@@ -281,7 +281,9 @@ def page3(ctx):
                  + (f'<span class="note">{rw["words"]} words</span>' if rw.get("words") else "")
                  + f'<span class="note">Score out of 7 <span class="delta">{v["before"]} &rarr; {v["after"]}</span> · users {u["new"]}-{u["old"]} for the new line'
                  + (f' · blocked by {E(", ".join(people[x].name for x in v["vetoes"]))}' if v["vetoes"] else "") + '</span></div>'
-                 f'<p class="before">{E(rw["original"])}</p><p class="after">{E(rw["proposed"])}</p>'
+                 f'<p class="before">{E(rw["original"])}</p><div class="afterrow"><p class="after">{E(rw["proposed"])}</p>'
+                 + (f'<div class="tile"><span class="fig">{E(rw["tile_figure"])}</span><span class="tl">{E(rw.get("tile_label") or "")}</span></div>'
+                    if rw.get("tile_figure") else "") + '</div>'
                  f'<p class="kv"><b>Why:</b> {E(_noid(rw["why"]))}</p>')
         for sid in rw.get("support_ids", [])[:2]:
             h.append(_nebius(sid, npool, nfacts.get(sid)))

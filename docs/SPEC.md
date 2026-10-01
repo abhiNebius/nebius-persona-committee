@@ -49,6 +49,8 @@ No custom GPTs. Distribution is the skill folder, installed into Claude Code (`~
 | D18 | Grade the value-pillar messaging, not only technical claims | 2026-09-30 |
 | D19 | Rewrite rules (word limits per element, one claim and one proof, outcome first, position-led headlines) enforced in code, set with PMM Sherpa | 2026-09-30 |
 | D20 | Persona reference lives on Confluence (under the M&E Marketing Hub) and reports link to it; scores are always labeled out of 7 | 2026-09-30 |
+| D21 | All copy follows the Nebius voice (Kostas's PMM house style): title plus one flowing sentence, proof in a stat tile, no colon formulas | 2026-09-30 |
+| D22 | Eleven persona icons in the Nebius illustration style, used on the Confluence page | 2026-09-30 |
 | D15 | Package both skills (`persona-committee`, `nebius-marketing-writer`) in one private GitHub repo with an install script for Claude Code and Codex | 2026-09-30 |
 
 ## 4. Architecture
