@@ -180,7 +180,7 @@ def cmd_render(args, cfg, rd=None, tav_status=None):
     tav_status = tav_status or runinfo.get("tavily", {})
     rv = read_json(rd / "reviews.json")
     ctx = {"people": load_personas(cfg), "pulse": read_json(rd / "pulse.json"), "reviews": rv["reviews"],
-           "run_dir": rd, "asset_text": (rd / "asset.txt").read_text(encoding="utf-8") if (rd / "asset.txt").exists() else "",
+           "persona_page_url": cfg.get("persona_page_url"), "run_dir": rd, "asset_text": (rd / "asset.txt").read_text(encoding="utf-8") if (rd / "asset.txt").exists() else "",
            "probe": rv.get("probe"), "debate": read_json(rd / "debate.json"), "numbers": read_json(rd / "numbers.json"),
            "judge": read_json(rd / "judge.json"), "pool": read_json(rd / "pool.json"),
            "vendors": read_json(rd / "vendors.json"), "rewrites": read_json(rd / "rewrites.json"),

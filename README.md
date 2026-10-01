@@ -108,6 +108,9 @@ The weakest and most-vetoed lines go to the Nebius marketing writer: its house r
 
 The committee re-votes blind (old and new in random order). Users decide which wins. Any buyer who marks the new line not believable blocks it. Lines that lose go back to the writer once more with the committee's reasons.
 
+### 4b. Rewrite rules
+Proposed copy must be usable as is. `references/rewrite-rules.md` (set with a PMM Sherpa review of the first runs, then checked against the house rules) caps each element type (headline 8 words on the web, pillar 25, proof 14, CTA 5; slightly more for one-pagers), allows one claim and one proof per line, puts the outcome before the proof, and makes headlines state a position rather than a credential. Code enforces the word limits, a two-sentence cap, one placeholder per line and no stacked figures. Spare proof is kept in a separate "other proof that fits" list instead of being crammed in.
+
 ### 5. The report
 One self-contained HTML file in Nebius colors, written like a marketing leader reviewing a draft: clear, simple, bright, with hard word limits on page one. Three parts, then a collapsible appendix.
 
@@ -117,6 +120,11 @@ One self-contained HTML file in Nebius colors, written like a marketing leader r
 | **2 The conversation** | A Slack-style thread: people quote the line, reply by name, push back, change their minds. Styled on the rhythm of real work threads |
 | **3 The rewrites** | Before and after for each weak line, the Nebius-published fact behind it (quoted, linked, dated), the pillar it lifts, the blind re-vote. Proof we have published but the asset does not use. Where a reviewer assumed something our own record contradicts |
 | Appendix | Competitive view (blind test, who else says it, patterns worth borrowing), market pulse, persona scores and objections, honesty checks, method and limits, every source |
+
+Every score is labeled **out of 7**, with a colour key. Persona names link to their entry on the Confluence persona page (`persona_page_url` in config).
+
+### The persona page on Confluence
+`scripts/persona_page.py` builds a Confluence page from the persona library: a roster, who to seat for each deal type, and for each persona the titles they go by, role and veto, when they join the deal, what they are measured on, what keeps them up at night, what earns their trust and how to message them. Each persona has an anchor (`#P01` to `#P11`). Live page: *Nebius Buyer Personas (Persona Committee)*, under The Media & Entertainment Marketing Hub.
 
 ## Install
 
@@ -205,6 +213,7 @@ skills/persona-committee/ the committee skill
   references/             scoring rubric, report style guide
   templates/report.html   report template
   scripts/committee.py    command line
+  scripts/persona_page.py builds the Confluence persona page
 skills/nebius-marketing-writer/  the copywriter: SKILL.md, house rules, lint_asset.py
 tests/test_offline.py     parser and guardrail checks, no model or Tavily calls
 ```

@@ -59,6 +59,8 @@ h3 { color: var(--deep); font-size: 18px; margin: 28px 0 10px; }
 .s6 { background: #9EC3D8; color: var(--deep); }
 .s7 { background: var(--deep); color: #fff; }
 .sx { background: transparent; color: var(--grey); }
+.scale { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; font-size: 12.5px; color: var(--body); margin: 4px 0 14px; }
+.scale .sc { min-width: 24px; height: 22px; font-size: 12px; }
 /* page 1: annotated asset + numbered notes */
 .score-layout { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 22px; align-items: start; }
 .asset-frame { position: sticky; top: 56px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px rgba(5,43,66,0.05); }
@@ -91,6 +93,8 @@ td.msgcell b { color: var(--deep); display: block; font-size: 13.5px; }
 td.msgcell span { color: var(--body); font-size: 12.5px; }
 th.gsep, td.gsep { border-left: 2px solid var(--hair); }
 .scroll { overflow-x: auto; }
+a.plink { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--grey); }
+a.plink:hover { color: var(--deep); border-bottom-color: var(--deep); }
 /* page 2: slack thread */
 .slack { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #fff; }
 .slack .ch { background: var(--deep); color: #fff; padding: 10px 16px; font-weight: 600; font-size: 14.5px; display: flex; justify-content: space-between; }

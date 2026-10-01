@@ -47,6 +47,8 @@ No custom GPTs. Distribution is the skill folder, installed into Claude Code (`~
 | D16 | A Nebius fact sweep (local blog and press corpus plus nebius.com via Tavily) runs before every review; nothing in the report may contradict it | 2026-09-30 |
 | D17 | Report is three parts: the score (annotated asset, message-by-persona grid, pillar coverage), the conversation (Slack-style), the rewrites (grounded in Nebius-published proof). Everything else is a collapsible appendix | 2026-09-30 |
 | D18 | Grade the value-pillar messaging, not only technical claims | 2026-09-30 |
+| D19 | Rewrite rules (word limits per element, one claim and one proof, outcome first, position-led headlines) enforced in code, set with PMM Sherpa | 2026-09-30 |
+| D20 | Persona reference lives on Confluence (under the M&E Marketing Hub) and reports link to it; scores are always labeled out of 7 | 2026-09-30 |
 | D15 | Package both skills (`persona-committee`, `nebius-marketing-writer`) in one private GitHub repo with an install script for Claude Code and Codex | 2026-09-30 |
 
 ## 4. Architecture

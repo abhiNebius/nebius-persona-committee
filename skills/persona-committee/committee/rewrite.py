@@ -25,6 +25,7 @@ WRITE_SCHEMA = obj(rewrites=arr(obj(
     pillar=s(enum=["build_faster", "scale_with_confidence", "own_your_intelligence", "none"]),
     evidence=arr(s("Where each fact comes from, e.g. 'Company Messaging Framework 2.0, Page 8'")),
     placeholders=arr(s("Each [bracketed] item a human must fill with a sourced fact")),
+    also_proof=arr(s("Other published proof that fits this line but was left out to keep one proof per line")),
 )))
 
 VOTE_SCHEMA = obj(votes=arr(obj(
@@ -68,13 +69,34 @@ def _lint(cfg, text, asset_type):
     return {"ran": True, "errors": errs, "warnings": warns}
 
 
+LIMITS = {  # (web page, one-pager or document), in words; see references/rewrite-rules.md
+    "headline": (8, 10), "subhead": (16, 18), "pillar": (25, 30), "proof": (14, 18), "cta": (5, 5), "body": (25, 30)}
+
+
+def _metrics(text):
+    """Distinct figures in a line, ignoring years, versions after a rating name and anything in brackets."""
+    bare = re.sub(r"\[[^\]]*\]", " ", text)
+    bare = re.sub(r"\b(ClusterMAX|MLPerf|Inference|v)\s*\d+(\.\d+)*", " ", bare, flags=re.I)
+    figs = re.findall(r"(?<![A-Za-z\d.,])\d[\d,.]*", bare)  # skip model and product names such as R1, H100, GB300
+    return [n.rstrip(".,") for n in figs if not re.fullmatch(r"(19|20)\d\d", n.rstrip(".,"))]
+
+
 def _numbers(text):
     bare = re.sub(r"\[[^\]]*\]", " ", text)
     return set(re.findall(r"\d+(?:[.,]\d+)?", bare))
 
 
-def check(cfg, lib, rw, original, sources_text, asset_type):
+def check(cfg, lib, rw, original, sources_text, asset_type, part="body", medium="web"):
     issues = []
+    lim = LIMITS.get(part, LIMITS["body"])[0 if medium == "web" else 1]
+    n_words = len(rw["proposed"].split())
+    if n_words > lim:
+        issues.append(f"Too long for a {part}: {n_words} words (limit {lim})")
+    sentences = [x for x in re.split(r"(?<=[.!?])\s+", rw["proposed"].strip()) if x]
+    if len(sentences) > 2:
+        issues.append(f"{len(sentences)} sentences (limit 2)")
+    if len(_metrics(rw["proposed"])) > 3:  # a figure, its unit count and a baseline is still one proof
+        issues.append("Stacks several figures; keep one proof per line and move the rest to also_proof")
     comp = set().union(*(shingles(ln) for _, ln in lib.corpus())) if lib.entries else set()
     shared = shingles(rw["proposed"]) & comp
     if shared:
@@ -84,8 +106,8 @@ def check(cfg, lib, rw, original, sources_text, asset_type):
     if bad:
         issues.append("Numbers not found in the claims sources or the original: " + ", ".join(bad))
     ph = re.findall(r"\[[^\]]*\]", rw["proposed"])
-    if len(ph) > 3:
-        issues.append(f"Too many placeholders to read as copy ({len(ph)}; the limit is 3)")
+    if len(ph) > 1:
+        issues.append(f"Too many placeholders to read as copy ({len(ph)}; the limit is 1)")
     lint = _lint(cfg, rw["proposed"], asset_type)
     issues += ["Lint: " + e for e in lint["errors"]]
     return issues, lint
@@ -96,6 +118,8 @@ def write(engine, cfg, lib, people, pulse, reviews, judge_out, pool, feedback=No
     rules, nn, pb_name, pb, sources = _writer_rules(cfg, meta["asset_type"], lib)
     claim = {c["id"]: c["text"] for c in meta["claims"]}
     pillar_of = {c["id"]: c.get("pillar", "none") for c in meta["claims"]}
+    part_of = {c["id"]: c.get("part", "body") for c in meta["claims"]}
+    medium = "web" if str(pulse.get("source", "")).startswith("http") else "document"
     facts = pulse.get("nebius", {})
     npool = facts.get("pool", {})
     unused_txt = "\n".join(f"{x['passage_id']} ({npool.get(x['passage_id'], {}).get('date') or 'recent'}): {x['quote']}"
@@ -110,13 +134,17 @@ def write(engine, cfg, lib, people, pulse, reviews, judge_out, pool, feedback=No
         fb = (feedback or {}).get(t["claim_id"])
         sup = [x for x in facts.get("supports", []) if x["claim_id"] == t["claim_id"]]
         sup_txt = "\n".join(f"  {x['passage_id']} ({npool.get(x['passage_id'], {}).get('date') or 'recent'}): {x['quote']}" for x in sup)
-        rows.append(f"{t['claim_id']} [{pillar_of.get(t['claim_id'], 'none')}]: \"{claim.get(t['claim_id'], '')}\"\nPROBLEM: {t['problem']}\n"
+        pt = part_of.get(t["claim_id"], "body")
+        lim = LIMITS.get(pt, LIMITS["body"])[0 if medium == "web" else 1]
+        rows.append(f"{t['claim_id']} [{pt}, max {lim} words; pillar {pillar_of.get(t['claim_id'], 'none')}]: \"{claim.get(t['claim_id'], '')}\"\nPROBLEM: {t['problem']}\n"
                     f"THE COMMITTEE ASKED FOR: {t['asks']}\n"
                     f"OBJECTIONS:\n- " + "\n- ".join(objs[:6]) + (f"\nNEBIUS FACTS FOR THIS LINE:\n{sup_txt}" if sup_txt else "")
                     + (f"\nLAST ROUND FEEDBACK: {fb}" if fb else ""))
     pats = "\n".join(f"{p['quote_id']} ({pool[p['quote_id']]['company']}): \"{pool[p['quote_id']]['quote']}\" "
                      f"PATTERN: {p['title']}. {p['explanation']}" for p in judge_out["patterns"] if p["quote_id"] in pool)
-    system = ("You are the Nebius marketing writer. Follow the house rules, the playbook and the non-negotiables exactly. "
+    system = ("You are the Nebius marketing writer. Follow the REWRITE RULES first, then the house rules, the playbook and "
+              "the non-negotiables. Usable beats complete: one claim, one proof, within the word limit for the element "
+              f"type on a {medium}. "
               "Rewrite each flagged line so it answers the committee's objections AND makes its Nebius value pillar shine "
               "(Build faster, Scale with confidence, Own your intelligence). This is messaging, not a spec sheet: lead with what "
               "the buyer gets, then the proof. Pull supporting points from the Nebius-published facts given (cite them in "
@@ -126,7 +154,7 @@ def write(engine, cfg, lib, people, pulse, reviews, judge_out, pool, feedback=No
               "[bracketed placeholder], but a line may carry at most 3 placeholders and must read as finished copy a buyer "
               "would see on the page, not a template. Prefer a shorter, fully sourced line over a longer bracketed one. "
               "Competitor examples show structure only: never reuse their wording. "
-              "No em-dashes.\n\n# HOUSE RULES\n" + rules + "\n\n# NON-NEGOTIABLES\n" + nn +
+              "No em-dashes.\n\n# REWRITE RULES\n" + C.reference("rewrite-rules.md") + "\n\n# HOUSE RULES\n" + rules + "\n\n# NON-NEGOTIABLES\n" + nn +
               f"\n\n# PLAYBOOK ({pb_name})\n" + pb + "\n\n# CLAIMS SOURCES (the only allowed facts)\n" + sources)
     prompt = f"ASSET: {meta['title']} (asset type {meta['asset_type']})\n\nLINES TO REWRITE\n" + "\n\n".join(rows) + \
              f"\n\nPATTERNS WORTH BORROWING (structure only)\n{pats or 'none'}" + \
@@ -137,7 +165,8 @@ def write(engine, cfg, lib, people, pulse, reviews, judge_out, pool, feedback=No
         rw["original"] = claim.get(rw["claim_id"], "")
         rw["support_ids"] = [x for x in rw.get("support_ids", []) if x in npool]
         rw["issues"], rw["lint"] = check(cfg, lib, rw, rw["original"], sources + "\n" + rules + "\n" + nn + "\n" + fact_text,
-                                         meta["asset_type"])
+                                         meta["asset_type"], part_of.get(rw["claim_id"], "body"), medium)
+        rw["words"] = len(rw["proposed"].split())
         if rw["pattern_quote_id"] not in pool:
             rw["pattern_quote_id"] = None
     return [rw for rw in out["rewrites"] if rw["claim_id"] in claim]

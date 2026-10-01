@@ -13,6 +13,8 @@ STATUS = {"recommended": "Recommended", "blocked_by_buyer": "Blocked by a buyer"
           "users_prefer_original": "Users preferred the original", "failed_checks": "Failed checks"}
 OVERLAP = {"table_stakes": "Everyone says this", "contested": "Contested", "open_lane": "Open lane"}
 PILLAR_STATUS = {"lands": "Lands", "weak": "Weak", "missing": "Missing"}
+SCALE = ('<div class="scale"><span>Score key, out of 7:</span>' + "".join(
+    f'<span class="sc s{n}">{n}</span>' for n in range(1, 8)) + '<span>1 stop reading · 4 neutral · 7 would forward it</span></div>')
 
 
 # ---- small helpers -----------------------------------------------------------
@@ -28,6 +30,15 @@ def _names(text, names):
     return re.sub(r"\bMembers? ([A-C])(?:,? and ([A-C]))?\b",
                   lambda m: names.get(m.group(1), m.group(0)) + (f" and {names.get(m.group(2), m.group(2))}" if m.group(2) else ""),
                   text)
+
+
+PERSONA_URL = ""
+
+
+def _plink(p, text=None):
+    """A persona's name, linked to its entry on the Confluence persona page when one is configured."""
+    label = E(text or p.name)
+    return f'<a class="plink" href="{E(PERSONA_URL)}#{p.pid}" target="_blank" rel="noopener">{label}</a>' if PERSONA_URL else label
 
 
 def _sc(n):
@@ -143,8 +154,8 @@ def page1(ctx):
     rows = {r["id"]: r for r in N["grid"]}
     h = ['<section class="page" id="score"><div class="wrap"><div class="pnum">1 · The score</div>',
          '<h2>How each message lands</h2>',
-         '<p class="lede">Numbers on the page match the list. Scores are 1 to 7, averaged for the people who build with it (users) '
-         'and the people who approve and sign (buyers).</p>']
+         '<p class="lede">Numbers on the page match the list. Each score is <b>out of 7</b>, averaged for the people who build with it (users) '
+         'and the people who approve and sign (buyers).</p>' + SCALE]
     if pulse.get("banner"):
         h.append(f'<div class="banner">{E(pulse["banner"])}</div>')
     h.append('<div class="score-layout">' + _asset_frame(ctx, nums) + '<div class="notes">')
@@ -155,7 +166,7 @@ def page1(ctx):
         veto = f' <span class="tag t-veto">Vetoed by {E(", ".join(people[x].name for x in r["vetoes"]))}</span>' if r["vetoes"] else ""
         h.append(f'<div class="nrow"><span class="pin">{nums[cid]}</span><div><div class="lab">{E(r["label"])}{veto}</div>'
                  f'<div class="msg">{E(r["text"])}</div><div class="crit">{E(_noid(notes.get(cid, "")))}</div></div>'
-                 f'<div class="scores">Users {_avg_sc(r["users"])}Buyers {_avg_sc(r["buyers"])}</div></div>')
+                 f'<div class="scores">Users /7 {_avg_sc(r["users"])}Buyers /7 {_avg_sc(r["buyers"])}</div></div>')
     h.append('</div></div>')
     # value pillars
     if J.get("pillars"):
@@ -166,13 +177,14 @@ def page1(ctx):
         h.append('</div></div>')
     # the grid: messages ranked, one column per persona
     seat_u, seat_b = N["users"], N["buyers"]
-    h.append('<h3>The grid: every message, every persona</h3><p class="note">Ranked by users first, then buyers. '
-             'A dark tag means a buyer would stop the deal on that line.</p><div class="scroll"><table><tr>'
+    h.append('<h3>The grid: every message, every persona</h3><p class="note"><b>Scores are out of 7</b> '
+             '(7: would forward the page for this line · 4: neutral · 1: would stop reading). Ranked by users first, then buyers. '
+             'A dark tag means a buyer would stop the deal on that line.' + (f' <a href="{E(PERSONA_URL)}" target="_blank" rel="noopener">Who are these personas?</a>' if PERSONA_URL else '') + '</p>' + SCALE + '<div class="scroll"><table><tr>'
              '<th class="l">#</th><th class="l">Message</th>')
     for n, pid in enumerate(seat_u + seat_b):
         sep = ' class="gsep"' if n == len(seat_u) else ""
-        h.append(f'<th{sep}>{E(people[pid].name)}<span class="r">{E(people[pid].role_label)}</span></th>')
-    h.append('<th class="gsep">Users</th><th>Buyers</th></tr>')
+        h.append(f'<th{sep}>{_plink(people[pid])}<span class="r">{E(people[pid].role_label)}</span></th>')
+    h.append('<th class="gsep">Users<span class="r">avg /7</span></th><th>Buyers<span class="r">avg /7</span></th></tr>')
     for cid in N["ranked"]:
         r = rows[cid]
         h.append(f'<tr><td class="l"><span class="pin">{nums.get(cid, "")}</span></td>'
@@ -236,7 +248,7 @@ def page2(ctx):
                          f'{sc["new_score"]}</div>')
             initials = "".join(w[0] for w in p.name.split())[:2].upper()
             h.append(f'<div class="msgrow"><div class="av {p.group}">{E(initials)}</div><div>'
-                     f'<div class="who">{E(p.name)}<span class="r">{E(p.role_label)}</span><span class="t">10:{minute:02d}</span></div>'
+                     f'<div class="who">{_plink(p)}<span class="r">{E(p.role_label)}</span><span class="t">10:{minute:02d}</span></div>'
                      f'<div class="txt">{_slack_text(txt)}</div>{_chips(t.get("pulse_used"), items)}{react_html}{moved}</div></div>')
         h.append('</div>')
     h.append('</div></div></section>')
@@ -266,12 +278,16 @@ def page3(ctx):
         h.append(f'<div class="rw"><div class="top"><span class="pin">{nums.get(rw["claim_id"], "")}</span>'
                  f'<span class="lab">{E(r.get("label", ""))}</span><span class="tag t-{v["status"]}">{STATUS[v["status"]]}</span>'
                  + (f'<span class="tag t-weak" style="background:#EEF4FF;color:var(--deep)">{E(pill)}</span>' if pill else "")
-                 + f'<span class="note">Score <span class="delta">{v["before"]} &rarr; {v["after"]}</span> · users {u["new"]}-{u["old"]} for the new line'
+                 + (f'<span class="note">{rw["words"]} words</span>' if rw.get("words") else "")
+                 + f'<span class="note">Score out of 7 <span class="delta">{v["before"]} &rarr; {v["after"]}</span> · users {u["new"]}-{u["old"]} for the new line'
                  + (f' · blocked by {E(", ".join(people[x].name for x in v["vetoes"]))}' if v["vetoes"] else "") + '</span></div>'
                  f'<p class="before">{E(rw["original"])}</p><p class="after">{E(rw["proposed"])}</p>'
                  f'<p class="kv"><b>Why:</b> {E(_noid(rw["why"]))}</p>')
         for sid in rw.get("support_ids", [])[:2]:
             h.append(_nebius(sid, npool, nfacts.get(sid)))
+        if rw.get("also_proof"):
+            spare = [re.sub(r"^\s*[:,-]\s*", "", _noid(x)) for x in rw["also_proof"][:3]]
+            h.append('<p class="kv"><b>Other proof that fits (left out to keep one proof per line):</b> ' + E("; ".join(spare)) + '</p>')
         if rw["placeholders"]:
             h.append('<p class="kv"><b>Fill before publishing:</b> ' + E("; ".join(rw["placeholders"])) + '</p>')
         if rw["issues"]:
@@ -340,11 +356,11 @@ def appendix(ctx):
         f'<li>{E(it["headline"])} <span class="note">{E(it["why"])}</span> {_chips([it["id"]], {it["id"]: it})}</li>' for it in items] + ['</ul>']
     parts.append(_app(f"B · Market pulse: {len(items)} live items the committee saw", "".join(mp) if items else "<p>None.</p>"))
     # C. persona scores
-    ps = ['<div class="scroll"><table><tr><th class="l">Persona</th>' + "".join(f"<th>{E(LABELS[k])}</th>" for k in CRITERIA)
+    ps = ['<p class="note"><b>Scores are out of 7.</b></p><div class="scroll"><table><tr><th class="l">Persona</th>' + "".join(f"<th>{E(LABELS[k])}</th>" for k in CRITERIA)
           + '<th>Average</th><th>Meeting?</th><th class="l">Stopping objection</th></tr>']
     for pid in N["ranking"]:
         r = rv[pid]
-        ps.append(f'<tr><td class="l"><b style="color:var(--deep)">{E(people[pid].name)}</b> <span class="note">{E(people[pid].role_label)}</span></td>'
+        ps.append(f'<tr><td class="l"><b style="color:var(--deep)">{_plink(people[pid])}</b> <span class="note">{E(people[pid].role_label)}</span></td>'
                   + "".join(f"<td>{_sc(r['scores'][k]['score'])}</td>" for k in CRITERIA)
                   + f'<td>{_avg_sc(N["per_persona"][pid]["mean"])}</td><td><span class="tag t-{r["meeting"]}">{r["meeting"].title()}</span></td>'
                   f'<td class="l note">{E(r["stopping_objection"]["text"])}</td></tr>')
@@ -418,6 +434,8 @@ def sources_section(ctx):
 
 
 def render(ctx):
+    global PERSONA_URL
+    PERSONA_URL = ctx.get("persona_page_url") or ""
     pulse, J = ctx["pulse"], ctx["judge"]
     m = pulse["meta"]
     header = (f'<header class="top"><div class="wrap"><div class="brand"><div class="wordmark">nebius<span>.</span> persona committee</div>'
